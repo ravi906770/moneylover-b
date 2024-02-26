@@ -1,5 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { Category } from './categoryModel';
+// import { transactionSchemaValidation } from '../validator/schema';
 
 
 
@@ -26,6 +27,16 @@ const schema = new Schema<Transaction>({
   status : {type : String , required : true},
   mode : {type : String , required : true}
 });
+
+
+// schema.pre('save', async function (next) {
+//   try {
+//     await transactionSchemaValidation.validateAsync(this);
+//     next();
+//   } catch (error:any) {
+//     next(error);
+//   }
+// });
 
 
 const TransactionModel = mongoose.model<Transaction>('Transaction', schema);

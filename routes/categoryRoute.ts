@@ -6,7 +6,7 @@ import { createCategory, getCategory } from "../controllers/categoryConroller";
 const router  = express.Router();
 
 
-router.post("/category" , createCategory);
+router.post("/category" ,createCategory);
 router.get("/getCategory" , getCategory)
 
 

@@ -69,6 +69,7 @@ export const getAllTransaction =async (req:Request , res:Response) : Promise<voi
 }
 
 
+// delete the transaction
 
 export const deleteTransaction =async (req:Request , res:Response) : Promise<void>=>{
     try {

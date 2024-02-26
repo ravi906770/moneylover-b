@@ -2,6 +2,7 @@ import express from 'express';
 import {json} from "body-parser";
 import cors from "cors";
 import dotenv from "dotenv";
+import CookieParser from "cookie-parser"
 import connection from './config/db';
 import authRoute from "./routes/authRoute"
 import categoryRoute from "./routes/categoryRoute"
@@ -14,8 +15,11 @@ dotenv.config();
 connection();
 
 const app = express();
-app.use(json());
+
+app.use(express.json());
 app.use(cors());
+app.use(CookieParser());
+
 
 app.use('/api/v1' , authRoute);
 app.use('/api/v1' , categoryRoute)

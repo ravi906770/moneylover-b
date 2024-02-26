@@ -43,7 +43,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         const { email, password } = req.body;
 
         if (!email || !password) {
-            res.sendStatus(400).json({
+            res.json({
                 success: false,
                 message: "Invalid Email or Password!"
             })
@@ -66,21 +66,30 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         }
         else if (match) {
 
-            const secretKey = "12345";
-            const expiresIn = "60d";
+            const secretKey = "12345"
 
 
-            const token = jwt.sign({ _id: user?._id }, secretKey, { expiresIn });
+
+            const access_token = jwt.sign({ _id: user?._id }, secretKey, { expiresIn:"10s" });
+            const refresh_token = jwt.sign({_id : user?._id} , secretKey , { expiresIn : "1d" })
             // const user= {
             //     firstname: user?.firstname,
             //     lastname: user?.lastname,
             //     email: user?.email,
             //     mobile_no: user?.mobile_no,
 
+
+            if (user) {
+                user.refresh_token = refresh_token;
+            }
+            const result = await user?.save();
+
+            res.cookie('jwt', refresh_token, { httpOnly: true, secure: true, sameSite: 'none', maxAge: 24 * 60 * 60 * 1000})
+
             res.json({
                 success: true,
                 message: "Login Successful!!",
-                token
+                access_token
             });
         }
 
