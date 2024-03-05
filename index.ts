@@ -1,25 +1,41 @@
 import express from 'express';
-import {json} from "body-parser";
 import cors from "cors";
-import dotenv from "dotenv";
 import CookieParser from "cookie-parser"
 import connection from './config/db';
 import authRoute from "./routes/authRoute"
 import categoryRoute from "./routes/categoryRoute"
 import transactionRoute from "./routes/transactionRoute"
+import cookieSession from "cookie-session"
+import passport from "passport"
+// import passportSetup from "./passport"
 
 
 
-dotenv.config();
 
 connection();
 
 const app = express();
 
+// Body Parser Middleware
 app.use(express.json());
-app.use(cors());
+
+// Cookie Parser Middleware
 app.use(CookieParser());
 
+app.use(cookieSession({
+  name : "session",
+  keys : ["cyberwolve"],
+  maxAge : 24*60*60*100
+}))
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Use CORS middleware with specific origin allowed
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true, // Enable credentials (cookies, authorization headers, etc.)
+  }));
 
 app.use('/api/v1' , authRoute);
 app.use('/api/v1' , categoryRoute)

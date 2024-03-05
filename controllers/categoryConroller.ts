@@ -53,3 +53,21 @@ export const getCategory = async(req : Request , res: Response) : Promise<void>=
         res.json("Error in Get the Category")
     }
 }
+
+
+
+export const getBudgetBoundry =async(req : Request , res: Response) : Promise<void> =>{
+    try {
+        const data = await CategoryModel.find({})
+        res.json({
+            success : true,
+            message : "Get the Budget Successfully",
+            data
+        })
+    } catch (error) {
+        res.json({
+            success : false,
+            message : "error in  getting Budget",
+        })
+    }
+}

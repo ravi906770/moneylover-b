@@ -7,10 +7,10 @@ import { Category } from './categoryModel';
 // Document interface
 interface Transaction {
   name: string;
-  discription: string;
+  description: string;
   date: string;
   category:string;
-  payment : string;
+  payment : number;
   end_date : string;
   status : string;
   mode : string
@@ -19,10 +19,10 @@ interface Transaction {
 // Schema
 const schema = new Schema<Transaction>({
     name: { type: String ,required: true},
-  discription:{ type: String,required: true},
+  description:{ type: String,required: true},
   date: { type: String ,required: true},
   category:{ type: String,required: true},
-  payment : { type: String ,required: true},
+  payment : { type: Number ,required: true},
   end_date: {type : String , required : true},
   status : {type : String , required : true},
   mode : {type : String , required : true}

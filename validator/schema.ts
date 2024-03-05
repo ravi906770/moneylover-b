@@ -6,15 +6,15 @@ const userSchemaValidation = Joi.object({
     firstname: Joi.string().required(),
     lastname: Joi.string().required(),
     email: Joi.string().email().required(),
-    password: Joi.string().max(14).min(6).alphanum().required(),
-    mobile_no: Joi.string().pattern(new RegExp('^[6-9]{10}$')).required(),
+    password: Joi.string().max(14).min(6).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/).required(),
+    mobile_no: Joi.string().pattern(new RegExp('^[0-9]{10}$')).required(),
     avatar: Joi.string()
   }).options({ allowUnknown: false });
 
 
 const transactionSchemaValidation = Joi.object({
     name: Joi.string().required(),
-    discription: Joi.string().required(),
+    description: Joi.string().required(),
     date: Joi.string().required(),
     category: Joi.string().required(),
     payment: Joi.string().required(),
@@ -27,7 +27,7 @@ const transactionSchemaValidation = Joi.object({
 
 const categorySchemaValidation = Joi.object({
     category: Joi.string().required(),
-    budgt_boundry: Joi.string().required(),
+    budgt_boundry: Joi.number().required(),
   }).options({ allowUnknown: false });
   
 

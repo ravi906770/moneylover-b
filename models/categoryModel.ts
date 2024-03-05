@@ -5,13 +5,13 @@ import mongoose, { Schema } from 'mongoose';
 // Document interface
 export interface Category {
   category: string;
-  budget_boundry: string;
+  budget_boundry: number;
 }
 
 // Schema
 const schema = new Schema<Category>({
     category: { type: String ,required: true},
-    budget_boundry : { type:String ,required: true},
+    budget_boundry : { type:Number ,required: true},
 });
 
 
