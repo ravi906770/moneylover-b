@@ -9,7 +9,7 @@ router.post("/transaction" , createTransaction);
 
 router.get("/getAllTransaction" , getAllTransaction);
 
-router.delete("/delete-transaction/:id" , deleteTransaction);
+router.delete("/delete-transaction/:_id" , deleteTransaction);
 
 router.get("/transaction-payment" , getTransaction)
 

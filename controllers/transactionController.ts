@@ -77,8 +77,8 @@ export const getAllTransaction =async (req:Request , res:Response) : Promise<voi
 
 export const deleteTransaction =async (req:Request , res:Response) : Promise<void>=>{
     try {
-        const {id} = req.params
-        await TransactionModel.findByIdAndDelete(id);
+        const {_id} = req.params
+        await TransactionModel.findByIdAndDelete(_id);
         res.json({
             success : true,
             message : "Successfully deleted"
