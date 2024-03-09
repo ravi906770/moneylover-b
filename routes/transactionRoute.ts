@@ -1,5 +1,5 @@
 import express from "express"
-import {  completedTransaction, createTransaction, deleteTransaction, getAllTransaction, getCategoryPayment, getTransaction, highTransaction, lowTransaction, pendingTransaction } from "../controllers/transactionController";
+import {  completedTransaction, createTransaction, deleteTransaction, getAllTransaction, getCategoryPayment, getTransaction, highTransaction, lowTransaction, pendingTransaction, updateTransactionController } from "../controllers/transactionController";
 
 const router = express.Router();
 
@@ -24,6 +24,8 @@ router.get("/completed" , completedTransaction)
 // router.get("/categoryP" , categoryTransaction)
 
 router.get("/categoryPayment" , getCategoryPayment)
+
+router.put("/updateTransaction/:_id" , updateTransactionController)
 
 
 

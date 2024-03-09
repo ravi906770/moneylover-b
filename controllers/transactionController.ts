@@ -58,10 +58,12 @@ export const createTransaction = async (req:Request , res:Response) : Promise<vo
 export const getAllTransaction =async (req:Request , res:Response) : Promise<void>=>{
     try {
         const getTransaction =  await TransactionModel.find({}).sort({createdAt:1});
+        const totalPayment = getTransaction.reduce((total, transaction) => total + transaction.payment, 0);
         res.json({
             success : true,
             message : "All Transaction",
-            getTransaction
+            getTransaction,
+            totalPayment
         })
 
         // console.log("________")
@@ -266,6 +268,7 @@ export const completedTransaction =  async (req:Request , res:Response) : Promis
 
 
 
+
 // export const categoryTransaction =  async (req:Request , res:Response) : Promise<void>=>{
 //     try {
 //         // const data = await TransactionModel.find({ status: "completed"  }).select("status");
@@ -284,3 +287,33 @@ export const completedTransaction =  async (req:Request , res:Response) : Promis
 //         })
 //     }
 // }
+
+
+
+// Update the Transaction
+
+
+export const updateTransactionController = async (req:Request , res:Response) : Promise<void>=>{
+    try {
+        const {name , description , date , category , payment , status , mode} =req.body
+
+        const newTransaction = await TransactionModel.findByIdAndUpdate(
+            req.params._id,
+            {name , description , date , payment, category, status , mode},
+            { new: true }
+          );
+
+          await newTransaction?.save();
+      res.status(201).send({
+        success: true,
+        message: "Product Updated Successfully",
+        newTransaction,
+      });
+
+    } catch (error) {
+        res.json({
+            success : false,
+            message : "Error in Update the Transaction"
+        })
+    }
+}
