@@ -2,6 +2,7 @@
 import { Request ,Response } from "express";
 import TransactionModel from "../models/transactionModel";
 import { it } from "node:test";
+import dueModel from "../models/dueModel";
 
 
 // import axios from "axios";
@@ -314,6 +315,65 @@ export const updateTransactionController = async (req:Request , res:Response) : 
         res.json({
             success : false,
             message : "Error in Update the Transaction"
+        })
+    }
+}
+
+
+
+// Dues Add
+
+export const addDuesController = async(req:Request , res : Response) : Promise<void>=>{
+    const {name , date , payment} =  req.body;
+
+    try {
+
+        if(!(name || date || payment)){
+            res.json({
+                success : true , 
+                message : 'Every Field is Required!'
+            })
+            return
+        }
+
+        const formattedDate: string = formatDate(new Date(date));
+        const data = await new dueModel({
+            name,
+            date : formattedDate,
+            payment
+        }).save()
+
+        res.json({
+            success : true,
+            message : "Dues Added Successfully!!",
+            data
+        })
+        return
+
+    } catch (error) {
+        res.json({
+            success : false,
+            message : "Error in data adding!!",
+        })
+    }
+}
+
+
+// get all dues
+
+export const getAllDuesController = async(req:Request , res : Response) : Promise<void>=>{
+    try {
+        const data = await dueModel.find({});
+        res.json({
+            success : true,
+            message : "Dues get Successfully!!",
+            data
+        })
+        return
+    } catch (error) {
+        res.json({
+            success : false,
+            message : "Dues get Error!!",
         })
     }
 }

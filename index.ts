@@ -7,6 +7,7 @@ import categoryRoute from "./routes/categoryRoute"
 import transactionRoute from "./routes/transactionRoute"
 import cookieSession from "cookie-session"
 import passport from "passport"
+import bodyParser from 'body-parser';
 // import passportSetup from "./passport"
 
 
@@ -18,6 +19,7 @@ const app = express();
 
 // Body Parser Middleware
 app.use(express.json());
+app.use(bodyParser.json());
 
 // Cookie Parser Middleware
 app.use(CookieParser());

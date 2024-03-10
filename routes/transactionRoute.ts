@@ -1,5 +1,5 @@
 import express from "express"
-import {  completedTransaction, createTransaction, deleteTransaction, getAllTransaction, getCategoryPayment, getTransaction, highTransaction, lowTransaction, pendingTransaction, updateTransactionController } from "../controllers/transactionController";
+import {  addDuesController, completedTransaction, createTransaction, deleteTransaction, getAllDuesController, getAllTransaction, getCategoryPayment, getTransaction, highTransaction, lowTransaction, pendingTransaction, updateTransactionController } from "../controllers/transactionController";
 
 const router = express.Router();
 
@@ -27,7 +27,10 @@ router.get("/categoryPayment" , getCategoryPayment)
 
 router.put("/updateTransaction/:_id" , updateTransactionController)
 
+// add dues
 
+router.post("/addDues" , addDuesController)
+router.get("/getDues" ,getAllDuesController)
 
 
 export default router

@@ -71,3 +71,14 @@ export const getBudgetBoundry =async(req : Request , res: Response) : Promise<vo
         })
     }
 }
+
+
+
+
+export const getBudgeBoundryController = async(req : Request , res: Response) : Promise<void>=>{
+    try {
+        
+    } catch (error) {
+        
+    }
+}

@@ -32,11 +32,18 @@ const categorySchemaValidation = Joi.object({
   
 
 
+const DuesSchemaValidation = Joi.object({
+  name : Joi.string().required(),
+  date : Joi.date().required(),
+  payment : Joi.number().required()
+}).options({ allowUnknown: false });
+
+
 
 
 const validateUser = validateSchema(userSchemaValidation);
 const validateCategory = validateSchema(transactionSchemaValidation);
 const validateTransaction = validateSchema(categorySchemaValidation);
+const validateDues = validateSchema(DuesSchemaValidation)
 
-
-export {validateUser , validateCategory , validateTransaction}
+export {validateUser , validateCategory , validateTransaction , validateDues}
