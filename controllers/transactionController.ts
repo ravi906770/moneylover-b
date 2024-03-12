@@ -4,6 +4,8 @@ import TransactionModel from "../models/transactionModel";
 import { it } from "node:test";
 import dueModel from "../models/dueModel";
 import Razorpay from "razorpay";
+import nodemailer from 'nodemailer';
+import SplitBillModel from "../models/splitBillModel";
 
 
 // import axios from "axios";
@@ -408,5 +410,89 @@ export const payDuesController = async(req:Request , res : Response) : Promise<v
         success : false,
         message : "Not able to create order. Please try again!"
        })
+    }
+}
+
+
+
+// send the email notification
+
+export const sendEmailNotification = async (req: Request, res: Response) => {
+    const { name, description, payment, date, mode, category, status, emails } = req.body;
+
+    try {
+        if (!emails || emails.length === 0) {
+            throw new Error('No valid email recipients provided.');
+        }
+
+        const formattedDate: string = formatDate(new Date(date));
+
+      
+
+        console.log(emails);
+        
+        //Create a new instance of the SplitBillModel and save it to the database
+        const data = await new SplitBillModel({
+            name,
+            description,
+            payment,
+            mode,
+            date: formattedDate,
+            category,
+            status,
+            emails: emails 
+        }).save()
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'pankhaniyaravi05@gmail.com',
+                pass: 'zudy grcu arht uiow'
+            }
+        }); 
+
+        for (const email of emails) {
+            console.log("Emals",email);
+            
+            const info = await transporter.sendMail({
+                from: 'pankhaniyaravi05@gmail.com',
+                to: email,
+                subject: 'Payment Request',
+                text: `${name},\n\n${description},\n\nThis ${payment} you have to pay to me!`
+            });
+        }
+
+        res.json({
+            success: true,
+            message: "Request sent successfully",
+            // data
+        });
+    } catch (error) {
+        console.error('Error sending emails:', error);
+        res.json({
+            success: false,
+            message: "Failed to send the email request!"
+        });
+    }
+}
+;
+
+
+// get all SpliBill 
+
+
+export const getAllSplitBillController = async(req:Request , res:Response)=>{
+    try {
+        const data = await SplitBillModel.find({});
+        res.json({
+            success : true,
+            message : "Successfully get SplitBill!!",
+            data
+        })
+    } catch (error) {
+        res.json({
+            success : false,
+            message : "Error in getting SplitBill!!"
+        })
     }
 }

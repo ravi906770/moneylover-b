@@ -1,5 +1,5 @@
 import express from "express"
-import {  addDuesController, completedTransaction, createTransaction, deleteTransaction, getAllDuesController, getAllTransaction, getCategoryPayment, getTransaction, highTransaction, lowTransaction, payDuesController, pendingTransaction, updateTransactionController } from "../controllers/transactionController";
+import {  addDuesController, completedTransaction, createTransaction, deleteTransaction, getAllDuesController, getAllSplitBillController, getAllTransaction, getCategoryPayment, getTransaction, highTransaction, lowTransaction, payDuesController, pendingTransaction, sendEmailNotification, updateTransactionController } from "../controllers/transactionController";
 
 const router = express.Router();
 
@@ -36,6 +36,12 @@ router.get("/getDues" ,getAllDuesController)
 // pay dues
 
 router.post("/payDues" , payDuesController)
+
+
+// splitbill Routes
+
+router.post("/splitbill", sendEmailNotification)
+router.get("/getsplitbill", getAllSplitBillController)
 
 
 export default router
