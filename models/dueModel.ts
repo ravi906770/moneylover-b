@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Types } from 'mongoose';
 
 // Define Joi schema for validation
 
@@ -7,7 +7,9 @@ import mongoose, { Schema } from 'mongoose';
 interface Dues {
   name: string;
     date: string;
-    payment : number
+    payment : number,
+    userId: Types.ObjectId; 
+    
  
 }
 
@@ -16,6 +18,7 @@ const schema = new Schema<Dues>({
   name: { type: String, required: true },
   date: { type: String, required: true },
   payment: { type: Number, required: true },
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true }
 });
 
 // Define a pre-save hook to validate data using Joi

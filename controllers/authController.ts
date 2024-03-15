@@ -85,8 +85,8 @@ export const loginController = async (req: Request, res: Response): Promise<void
          if(match){
              const secretKey = "12345"
      
-             const access_token = jwt.sign({_id : user._id} , secretKey , {expiresIn : "10s"})
-             const refresh_token = jwt.sign({_id : user._id} , secretKey , {expiresIn : "1d"})
+             const access_token = jwt.sign({_id : user._id} , secretKey , {expiresIn : "1d"})
+             const refresh_token = jwt.sign({_id : user._id} , secretKey , {expiresIn : "10d"})
      
              if(user){
                  user.refresh_token = refresh_token;

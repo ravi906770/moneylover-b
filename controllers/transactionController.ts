@@ -6,6 +6,7 @@ import dueModel from "../models/dueModel";
 import Razorpay from "razorpay";
 import nodemailer from 'nodemailer';
 import SplitBillModel from "../models/splitBillModel";
+import { Types } from "mongoose";
 
 
 // import axios from "axios";
@@ -23,6 +24,7 @@ export const createTransaction = async (req:Request , res:Response) : Promise<vo
     try {
         const {name , description , date , category , payment , end_date , status , mode} = req.body
 
+        
         const formattedDate: string = formatDate(new Date(date));
         const formattedEndDate: string = formatDate(new Date(end_date));
 
@@ -41,7 +43,7 @@ export const createTransaction = async (req:Request , res:Response) : Promise<vo
             payment : payment,
             end_date : formattedEndDate,
             status : status,
-            mode: mode
+            mode: mode 
         }).save();
 
         res.json({
@@ -496,3 +498,43 @@ export const getAllSplitBillController = async(req:Request , res:Response)=>{
         })
     }
 }
+
+
+
+// get total for daily transaction 
+
+export const getDailyTransactionData = async (req: Request, res: Response) => {
+    try {
+        const transactions = await TransactionModel.find();
+
+        const dailyPaymentData: { date: string; payment: number }[] = [];
+
+        transactions.forEach(transaction => {
+            const date = transaction.date.toString();
+            const payment = transaction.payment;
+
+          
+            const existingRecord = dailyPaymentData.find(record => record.date === date);
+
+            if (existingRecord) {
+                
+                existingRecord.payment += payment;
+            } else {
+               
+                dailyPaymentData.push({ date, payment });
+            }
+        });
+
+       
+        res.json({
+            success: true,
+            message : "Get All Daily transaction data successfully!!",
+            dailyPaymentData
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Something went wrong in get data!!"
+        });
+    }
+};

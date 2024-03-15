@@ -1,20 +1,55 @@
 import { Request , Response , NextFunction } from "express";
 import { Schema, ValidationResult } from "joi";
-// import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken"
 
-// export const requireSignIn = async (req : Request, res:Response,next : NextFunction): Promise<void>=>{
-//     const token = req.headers.authorization as string;
-//     const secretKey: string = "12345";
-//    try {
-//     const decode = await jwt.verify(token , secretKey);
-//     req.user = decode;
-//     next();
-    
-// }
-//    catch (error) {
-//     console.log(error);
-//    } 
-// }
+interface customRequest extends Request {
+  user?:string;
+  }
+ export const verifyToken = (req: Request, res: Response, next: NextFunction) => {
+      try {
+          const authHeader = req.headers?.authorization ;
+          // console.log(authHeader);
+          
+          if (!authHeader) {
+             res.json({
+                success : false,
+                message : "You are not authorized!!"
+              });
+              return 
+          }
+   
+          const token = authHeader.split(' ')[1];
+          if (!token) {
+               res.json({
+                success : false,
+                message : "Can't find the token!!"
+              });
+              return
+          }
+   
+          jwt.verify(token,"12345", (err: any, decoded: any) => {
+              if (err) {
+                   res.json({
+                    success : false,
+                    message : "token is not verified!!!"
+                  });
+                  return
+              }
+           
+              req.user = decoded._id;
+             
+              next();
+          });
+      } catch (error) {
+          res.json({
+            success : false,
+            message : "Internal Server error"
+          });
+          return
+      }
+  };
+
+   
 
 
 export const validateSchema = <T>(schema: Schema<T>) => {

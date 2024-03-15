@@ -1,5 +1,5 @@
 import { string } from 'joi';
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Types  } from 'mongoose';
 // import { transactionSchemaValidation } from '../validator/schema';
 
 
@@ -13,7 +13,8 @@ interface SplitBill {
   payment : number;
   status : string;
   mode : string;
-  emails : string[];
+  emails : string[]
+  userId: Types.ObjectId; 
 }
 
 
@@ -27,7 +28,8 @@ const splitBillSchema = new Schema<SplitBill>({
     payment: { type: Number, required: true },
     status: { type: String, required: true },
     mode: { type: String, required: true },
-    emails:{type:[String]}
+    emails:{type:[String]},
+    // userId: { type: Schema.Types.ObjectId, ref: 'User', required: true }
 });
 
 
