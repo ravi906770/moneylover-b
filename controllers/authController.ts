@@ -2,6 +2,11 @@ import { comparePassword, hashPassword } from "../helper/authHelper";
 import { Request, Response } from 'express';
 import jwt from "jsonwebtoken";
 import UserModel from "../models/userModel";
+import passport from "passport";
+
+
+// 904326384994-3q7ij4sr0k6ljirjk4ani7e4l67pot6m.apps.googleusercontent.com  : google clinet id 
+// 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 : secret
 
 export const registerController = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -113,29 +118,11 @@ export const loginController = async (req: Request, res: Response): Promise<void
 }
 
 
-export const loginSuccess = async (req: Request, res: Response): Promise<void> =>{
-    if(req.user){
-        res.json({
-            success : true,
-            message : "success login",
-            user : req.user
-        })
-    }else{
-        res.json({
-            success : false,
-            message : "Not Authorized"
-        })
-    }
-    
-}
 
 
-export const loginFailed = async (req: Request, res: Response): Promise<void> =>{
-    res.json({
-        success : false,
-        message : "error in login"
-    })
-}
+// export const logout = async (req: Request, res: Response): Promise<void> =>{
+//   req.logout(done(null))
+// }
 
 // export const logout = async (req: Request, res: Response): Promise<void> =>{
 //     res.json({
@@ -233,6 +220,7 @@ export const forgotPasswordController = async (req: Request, res: Response): Pro
         })
     }
 }
+
 
 
 
