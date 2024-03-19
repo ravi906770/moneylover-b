@@ -1,6 +1,7 @@
 import express from "express"
-import { checkEmail, forgotPasswordController, loginController, refreshTokenGenerate, registerController } from "../controllers/authController";
+import { checkEmail, deleteController, forgotPasswordController, getSingleUserController, loginController, refreshTokenGenerate, registerController, updateProfileController } from "../controllers/authController";
 import {validateUser}  from "../validator/schema";
+import { verifyToken } from "../middleware/middleWare";
 
 // import { requireSignIn } from "../middleware/middleWare";
 
@@ -14,7 +15,12 @@ router.get("/check-email/:email" , checkEmail)
 
 router.post("/login" , loginController)
 router.get("/refresh" , refreshTokenGenerate)
-router.post("/forgot-password" , forgotPasswordController)
+router.post("/forgot-password" ,verifyToken, forgotPasswordController)
+router.put("/update" ,verifyToken, updateProfileController)
+
+router.delete("/delete" ,verifyToken, deleteController)
+
+router.get("/profile" , verifyToken , getSingleUserController)
 
 
 

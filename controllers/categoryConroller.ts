@@ -5,21 +5,23 @@ import { ReadableStreamDefaultController } from "node:stream/web";
 
 export const createCategory = async(req : Request , res: Response) : Promise<void>=>{
     try {
+        const userId = req.user
         const {category , budget_boundry} = req.body;
         if(!(category || budget_boundry)){
              res.json("field is required!!")
              return
         }
 
-        const existingCategory = await CategoryModel.findOne({category})
-        if(existingCategory){
-            res.json("category is already there!!!")
-            ReadableStreamDefaultController
-        }
+        // const existingCategory = await CategoryModel.findOne({category})
+        // if(existingCategory){
+        //     res.json("category is already there!!!")
+        //     return
+        // }
 
         const newCategory = await new CategoryModel({
             category,
-            budget_boundry
+            budget_boundry,
+            userId :userId
         }).save()
 
         res.json({
@@ -39,7 +41,8 @@ export const createCategory = async(req : Request , res: Response) : Promise<voi
 
 export const getCategory = async(req : Request , res: Response) : Promise<void>=>{
     try {
-        const getCategory =  await CategoryModel.find({});
+        const userId = req.user
+        const getCategory =  await CategoryModel.find({userId});
         res.json({
             success : true,
             message : "All Categories",
@@ -58,7 +61,8 @@ export const getCategory = async(req : Request , res: Response) : Promise<void>=
 
 export const getBudgetBoundry =async(req : Request , res: Response) : Promise<void> =>{
     try {
-        const data = await CategoryModel.find({})
+        const userId = req.user
+        const data = await CategoryModel.find({userId})
         res.json({
             success : true,
             message : "Get the Budget Successfully",

@@ -1,12 +1,12 @@
 
 import { Request ,Response } from "express";
 import TransactionModel from "../models/transactionModel";
-import { it } from "node:test";
 import dueModel from "../models/dueModel";
 import Razorpay from "razorpay";
 import nodemailer from 'nodemailer';
 import SplitBillModel from "../models/splitBillModel";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
+const ObjectId = mongoose.Types.ObjectId;
 
 
 // import axios from "axios";
@@ -22,6 +22,7 @@ function formatDate(date: Date): string {
 
 export const createTransaction = async (req:Request , res:Response) : Promise<void>=>{
     try {
+        const userId = req.user
         const {name , description , date , category , payment , end_date , status , mode} = req.body
 
         
@@ -43,7 +44,8 @@ export const createTransaction = async (req:Request , res:Response) : Promise<vo
             payment : payment,
             end_date : formattedEndDate,
             status : status,
-            mode: mode 
+            mode: mode ,
+            userId : userId
         }).save();
 
         res.json({
@@ -63,7 +65,13 @@ export const createTransaction = async (req:Request , res:Response) : Promise<vo
 
 export const getAllTransaction =async (req:Request , res:Response) : Promise<void>=>{
     try {
-        const getTransaction =  await TransactionModel.find({}).sort({createdAt:1});
+
+        // const page = parseInt(req.query.page as string) || 1;
+        // const limit = 10;
+        // const skip = (page - 1) * limit;   .skip(skip).limit(limit);;
+        const userId = req.user
+
+        const getTransaction =  await TransactionModel.find({userId}).sort({createdAt:1})
         const totalPayment = getTransaction.reduce((total, transaction) => total + transaction.payment, 0);
         res.json({
             success : true,
@@ -90,7 +98,6 @@ export const deleteTransaction =async (req:Request , res:Response) : Promise<voi
         res.json({
             success : true,
             message : "Successfully deleted"
-
         })
     } catch (error) {
         console.log(error);
@@ -103,11 +110,26 @@ export const deleteTransaction =async (req:Request , res:Response) : Promise<voi
 
 // get payment array month wise to show on the line chart
 
+export const getTransactionCon  = async (req:Request , res:Response) : Promise<void>=>{
+    try {
+        const userId = req.user
+        const data = await TransactionModel.find({userId})
+    } catch (error) {
+        
+    }
+}
+
 
 
 export const getTransaction = async (req:Request , res:Response) : Promise<void>=>{
         try {
+            const Id = req.user
+            // console.log("userrrrrr" , Id);
+            
             const transactions = await TransactionModel.aggregate([
+                {
+                    $match: { userId: new mongoose.Types.ObjectId(Id?.toString()) }
+                  },
                 {
                   $project: {
                     _id: 0, 
@@ -117,6 +139,9 @@ export const getTransaction = async (req:Request , res:Response) : Promise<void>
                 },
                 { $sort: { month: 1 } } 
               ]);
+
+            //   console.log(transactions);
+              
               var newTransaction=[0,0,0,0,0,0,0,0,0,0,0,0,0]
               for (let index = 0; index < transactions.length; index++) {
                 const element = transactions[index];
@@ -141,6 +166,8 @@ export const getTransaction = async (req:Request , res:Response) : Promise<void>
            })
             
         } catch (error) {
+            console.log(error);
+            
             res.json({
                 success : false,
                 message: "something went wrong while getting transaction!!"
@@ -155,7 +182,9 @@ export const getTransaction = async (req:Request , res:Response) : Promise<void>
 
 export const getCategoryPayment = async (req:Request , res:Response) : Promise<void>=>{
     try {
+        const Id = req.user
         const transaction = await TransactionModel.aggregate([
+           { $match: { userId: new mongoose.Types.ObjectId(Id?.toString()) }},
             {
                 $group :{
                     _id : '$category',
@@ -164,10 +193,25 @@ export const getCategoryPayment = async (req:Request , res:Response) : Promise<v
             }
         ])
 
+        // console.log(transaction);
+        
+
+
         const formatData = transaction.map(item=>({
             category : item._id,
             totalAmount : item.totalAmount
         }))
+
+        
+        if (transaction.length === 0) {
+            // Handle case where no transactions are found
+            res.json({
+                success: true,
+                message: "No transactions found for the user.",
+                formatData: []
+            });
+            return
+        }
         res.json({
             success : true,
             message : "Successfully get the Piechart",
@@ -332,7 +376,7 @@ export const addDuesController = async(req:Request , res : Response) : Promise<v
     const {name , date , payment} =  req.body;
 
     try {
-
+        const userId = req.user
         if(!(name || date || payment)){
             res.json({
                 success : true , 
@@ -345,7 +389,8 @@ export const addDuesController = async(req:Request , res : Response) : Promise<v
         const data = await new dueModel({
             name,
             date : formattedDate,
-            payment
+            payment,
+            userId : userId
         }).save()
 
         res.json({
@@ -368,7 +413,8 @@ export const addDuesController = async(req:Request , res : Response) : Promise<v
 
 export const getAllDuesController = async(req:Request , res : Response) : Promise<void>=>{
     try {
-        const data = await dueModel.find({});
+        const userId = req.user
+        const data = await dueModel.find({userId});
         res.json({
             success : true,
             message : "Dues get Successfully!!",
@@ -423,6 +469,7 @@ export const sendEmailNotification = async (req: Request, res: Response) => {
     const { name, description, payment, date, mode, category, status, emails } = req.body;
 
     try {
+        const userId = req.user
         if (!emails || emails.length === 0) {
             throw new Error('No valid email recipients provided.');
         }
@@ -442,7 +489,8 @@ export const sendEmailNotification = async (req: Request, res: Response) => {
             date: formattedDate,
             category,
             status,
-            emails: emails 
+            emails: emails ,
+            userId : userId
         }).save()
 
         const transporter = nodemailer.createTransport({
@@ -485,7 +533,8 @@ export const sendEmailNotification = async (req: Request, res: Response) => {
 
 export const getAllSplitBillController = async(req:Request , res:Response)=>{
     try {
-        const data = await SplitBillModel.find({});
+        const userId = req.user
+        const data = await SplitBillModel.find({userId});
         res.json({
             success : true,
             message : "Successfully get SplitBill!!",
@@ -505,7 +554,8 @@ export const getAllSplitBillController = async(req:Request , res:Response)=>{
 
 export const getDailyTransactionData = async (req: Request, res: Response) => {
     try {
-        const transactions = await TransactionModel.find();
+        const userId = req.user
+        const transactions = await TransactionModel.find({userId});
 
         const dailyPaymentData: { date: string; payment: number }[] = [];
 

@@ -3,6 +3,13 @@ import { Request, Response } from 'express';
 import jwt from "jsonwebtoken";
 import UserModel from "../models/userModel";
 import passport from "passport";
+import multer from "multer"
+import path from "path";
+import { upload } from "../helper/multerHelper";
+
+
+
+
 
 
 // 904326384994-3q7ij4sr0k6ljirjk4ani7e4l67pot6m.apps.googleusercontent.com  : google clinet id 
@@ -10,7 +17,7 @@ import passport from "passport";
 
 export const registerController = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { firstname , lastname, email, password, mobile_no, avatar } = req.body;
+        const { firstname , lastname, email, password, mobile_no } = req.body;
         
         const existinguser = await UserModel.findOne({ email });
         if (existinguser) {
@@ -23,9 +30,10 @@ export const registerController = async (req: Request, res: Response): Promise<v
 
         const hashedPassword = await hashPassword(password)
 
+
         const user = new UserModel({
             firstname, lastname, email
-            , mobile_no, password: hashedPassword
+            , mobile_no, password: hashedPassword,
         }).save();
 
         res.send({
@@ -221,6 +229,73 @@ export const forgotPasswordController = async (req: Request, res: Response): Pro
     }
 }
 
+
+
+export const updateProfileController = async (req: Request, res: Response): Promise<void> =>{
+    try {
+
+        const userId = req.user
+        const {firstname , lastname , email , mobile_no} = req.body
+
+        const data = await UserModel.findByIdAndUpdate(userId,{firstname,lastname,email,mobile_no}, {new:true})
+
+        await data?.save();
+
+        res.json({
+            success : true,
+            message : "Profile Update Successfully!!",
+            data
+        })
+
+
+    } catch (error) {
+        console.log(error)
+        res.json({
+            success : false,
+            message : "error in profile updation!!"
+        })
+    }
+}
+
+
+export const deleteController = async (req: Request, res: Response): Promise<void> =>{
+    try {
+        const userId = req.user
+        const data = await UserModel.findByIdAndDelete(userId)
+        res.json({
+            success : true,
+            message : "Profile Delete Successfully!!",
+            data
+        })
+    } catch (error) {
+        res.json({
+            success : false,
+            message : "error in profile deletion!!"
+        })
+    }
+}
+
+
+// get single user 
+
+export const getSingleUserController = async (req: Request, res: Response): Promise<void> =>{
+    try {
+        const userId = req.user
+        const data = await UserModel.findById(userId)
+        res.json({
+            success : true,
+            message : "User get Successfully!!",
+            data
+        })
+    } catch (error) {
+        console.log(error);
+        
+        res.json({
+            success : false,
+            message : "Error in get profile!!"
+        })
+    }
+}
 
 
 

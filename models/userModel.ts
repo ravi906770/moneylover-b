@@ -11,7 +11,7 @@ interface User {
   password: string;
   mobile_no: string;
   refresh_token : string;
-  avatar?: string;
+  avatar: string;
 }
 
 // Mongoose Schema
