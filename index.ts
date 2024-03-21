@@ -6,6 +6,7 @@
   import categoryRoute from "./routes/categoryRoute"
   import googleRoute from "./routes/googleRoute"
   import transactionRoute from "./routes/transactionRoute"
+  import limitRoute from "./routes/limitRoute"
   import cookieSession from "cookie-session"
   import passport from "passport"
   import bodyParser from 'body-parser';
@@ -52,6 +53,7 @@
   app.use('/api/v1' , categoryRoute)
   app.use("/api/v1" , transactionRoute)
   app.use("/auth" , googleRoute)
+  app.use("/api/v1", limitRoute)
 
   const PORT = 5000;
 
