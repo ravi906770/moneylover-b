@@ -343,31 +343,38 @@ export const completedTransaction =  async (req:Request , res:Response) : Promis
 // Update the Transaction
 
 
-export const updateTransactionController = async (req:Request , res:Response) : Promise<void>=>{
+export const updateTransactionController = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {name , description , date , category , payment , status , mode} =req.body
-
-        const newTransaction = await TransactionModel.findByIdAndUpdate(
-            req.params._id,
-            {name , description , date , payment, category, status , mode},
-            { new: true }
-          );
-
-          await newTransaction?.save();
+      const { name, description, date, category, payment, status, mode } = req.body;
+  
+      const updatedTransaction = await TransactionModel.findByIdAndUpdate(
+        req.params._id,
+        { name, description, date, category, payment, status, mode },
+        { new: true }
+      );
+  
+      if (!updatedTransaction) {
+        res.status(404).json({
+          success: false,
+          message: "Transaction not found",
+        });
+        return;
+      }
+  
       res.status(201).send({
         success: true,
-        message: "Product Updated Successfully",
-        newTransaction,
+        message: "Transaction updated successfully",
+        updatedTransaction,
       });
-
     } catch (error) {
-        res.json({
-            success : false,
-            message : "Error in Update the Transaction"
-        })
+      console.error("Error in updating transaction:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
     }
-}
-
+  };
+  
 
 
 // Dues Add

@@ -12,11 +12,11 @@ export const createCategory = async(req : Request , res: Response) : Promise<voi
              return
         }
 
-        // const existingCategory = await CategoryModel.findOne({category})
-        // if(existingCategory){
-        //     res.json("category is already there!!!")
-        //     return
-        // }
+        const existingCategory = await CategoryModel.findOne({ userId, category })
+        if(existingCategory){
+            res.json("category is already there!!!")
+            return
+        }
 
         const newCategory = await new CategoryModel({
             category,
