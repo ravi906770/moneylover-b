@@ -55,9 +55,7 @@ export const updateLimitController = async (req: Request, res: Response): Promis
     try {
         const userId = req.user
         const {income,daily_limit} = req.body;
-        const data = await LimitModel.findByIdAndUpdate(userId , {income , daily_limit } , {new:true})
-
-        await data?.save()
+        const data=await LimitModel.findOneAndUpdate({userId}, {$set:{income:income, daily_limit: daily_limit}}, {new: true})
 
         res.json({
             success : true,
@@ -66,6 +64,8 @@ export const updateLimitController = async (req: Request, res: Response): Promis
         })
 
     } catch (error) {
+        console.log(error);
+        
         res.json({
             success : false,
             message : "error in update the limit of user!!",

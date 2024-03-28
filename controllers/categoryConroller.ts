@@ -79,10 +79,26 @@ export const getBudgetBoundry =async(req : Request , res: Response) : Promise<vo
 
 
 
-export const getBudgeBoundryController = async(req : Request , res: Response) : Promise<void>=>{
-    try {
-        
-    } catch (error) {
-        
-    }
+export const updateCategoryController = async(req : Request , res: Response) : Promise<void> =>{
+        try {
+            const userId = req.user;
+            const {category , budget_boundry} = req.body
+            const data = await CategoryModel.findOneAndUpdate({userId} , {$set : {category : category , budget_boundry : budget_boundry}} , {new:true})
+
+            res.json({
+                success : true,
+                message : "Category Updated Successfully!!",
+                data
+            })
+            
+        } catch (error) {
+            res.json({
+                success : false,
+                message : "Error in Category Updatation!!",
+            })
+            console.log(error);
+            
+        }
 }
+
+

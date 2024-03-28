@@ -595,3 +595,51 @@ export const getDailyTransactionData = async (req: Request, res: Response) => {
         });
     }
 };
+
+
+
+export const getMonthWisePaymentController = async (req:Request , res:Response) =>{
+    try {
+        const userId = req.user
+
+        // const data = await TransactionModel.aggregate([
+        //     { $match: { userId: new mongoose.Types.ObjectId(userId?.toString()) }},
+        //     {
+        //       $project: {
+        //         month: { $month: { $toDate: "$date" } }, // Extract month from startdate
+        //         year: { $year: { $toDate: "$date" } },
+        //         payment: "$payment" // Extract year from startdate
+        //         // Include other fields you want to retrieve
+        //         // For example: amount, category, etc.
+        //       }
+        //     },
+        //     {
+        //       $group: {
+        //         _id: { month: "$month", year: "$year" },
+        //         // Include other fields you want to retrieve
+        //         // For example: totalAmount: { $sum: "$amount" }
+        //         payment: { $sum: "$payment" },
+        //         count: { $sum: 1 } // Count documents in each group
+        //       }
+        //     },
+        //     {
+        //       $sort: { "_id.year": 1, "_id.month": 1 } // Sort by year and month
+        //     }
+        //   ]);
+
+        const day = 0o2; // Example: Day you want to retrieve data for
+
+const data = await TransactionModel.find({
+  date: { $regex: new RegExp(`^${day}-`, 'i') }
+});
+          
+          res.json({
+            data
+          })
+          
+    } catch (error) {
+        res.json({
+            error
+          })
+    }
+}
