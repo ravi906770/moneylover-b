@@ -1,5 +1,5 @@
 import express from "express"
-import {  addDuesController, completedTransaction, createTransaction, deleteTransaction, getAllDuesController, getAllSplitBillController, getAllTransaction, getCategoryPayment, getDailyTransactionData, getMonthWisePaymentController, getTransaction, highTransaction, lowTransaction, payDuesController, pendingTransaction, sendEmailNotification, updateTransactionController } from "../controllers/transactionController";
+import {  addDuesController, completedTransaction, createTransaction, deleteTransaction, getAllDuesController, getAllSplitBillController, getAllTransaction, getCategoryPayment, getDailyTransactionData, getMonthWisePaymentController, getSplitBillNotification, getTransaction, highTransaction, lowTransaction, payDuesController, pendingTransaction, sendEmailNotification, updateTransactionController } from "../controllers/transactionController";
 import { verifyToken } from "../middleware/middleWare";
 
 const router = express.Router();
@@ -48,6 +48,8 @@ router.get("/getsplitbill",verifyToken, getAllSplitBillController)
 router.get("/dailydata" ,verifyToken, getDailyTransactionData)
 
 router.get("/monthdailydata" ,verifyToken, getMonthWisePaymentController)
+
+router.get("/splitnotification", verifyToken , getSplitBillNotification)
 
 
 

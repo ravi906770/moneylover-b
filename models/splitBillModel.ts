@@ -29,7 +29,7 @@ const splitBillSchema = new Schema<SplitBill>({
     status: { type: String, required: true },
     mode: { type: String, required: true },
     emails:{type:[String]},
-    // userId: { type: Schema.Types.ObjectId, ref: 'User', required: true }
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true }
 });
 
 

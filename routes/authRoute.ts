@@ -15,7 +15,7 @@ router.get("/check-email/:email" , checkEmail)
 
 router.post("/login" , loginController)
 router.get("/refresh" , refreshTokenGenerate)
-router.post("/forgot-password" ,verifyToken, forgotPasswordController)
+router.post("/forgot-password" , forgotPasswordController)
 router.put("/update" ,verifyToken, updateProfileController)
 
 router.delete("/delete" ,verifyToken, deleteController)

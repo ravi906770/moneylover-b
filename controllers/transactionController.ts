@@ -1,11 +1,13 @@
 
-import { Request ,Response } from "express";
+import { Request, Response } from "express";
 import TransactionModel from "../models/transactionModel";
 import dueModel from "../models/dueModel";
 import Razorpay from "razorpay";
 import nodemailer from 'nodemailer';
 import SplitBillModel from "../models/splitBillModel";
 import mongoose, { Types } from "mongoose";
+import userModel from "../models/userModel";
+import { use } from "passport";
 const ObjectId = mongoose.Types.ObjectId;
 
 
@@ -20,50 +22,50 @@ function formatDate(date: Date): string {
     return `${day}-${month}-${year}`;
 }
 
-export const createTransaction = async (req:Request , res:Response) : Promise<void>=>{
+export const createTransaction = async (req: Request, res: Response): Promise<void> => {
     try {
         const userId = req.user
-        const {name , description , date , category , payment , end_date , status , mode} = req.body
+        const { name, description, date, category, payment, end_date, status, mode } = req.body
 
-        
+
         const formattedDate: string = formatDate(new Date(date));
         const formattedEndDate: string = formatDate(new Date(end_date));
 
-        if(!(name || description || date || category || payment || end_date || status || mode)){
+        if (!(name || description || date || category || payment || end_date || status || mode)) {
             res.json("Every Field is Required!!")
             return
         }
 
-       
+
 
         const newTransaction = await new TransactionModel({
-            name : name,
-            description :description,
+            name: name,
+            description: description,
             date: formattedDate,
-            category : category ,
-            payment : payment,
-            end_date : formattedEndDate,
-            status : status,
-            mode: mode ,
-            userId : userId
+            category: category,
+            payment: payment,
+            end_date: formattedEndDate,
+            status: status,
+            mode: mode,
+            userId: userId
         }).save();
 
         res.json({
-            success : true,
-            message : "Transaction is Added Successfully",
+            success: true,
+            message: "Transaction is Added Successfully",
             newTransaction
         })
 
     } catch (error) {
         console.log(error)
         res.json("Error in Add new Transaction")
-       
-   }
+
+    }
 }
 
 
 
-export const getAllTransaction =async (req:Request , res:Response) : Promise<void>=>{
+export const getAllTransaction = async (req: Request, res: Response): Promise<void> => {
     try {
 
         // const page = parseInt(req.query.page as string) || 1;
@@ -71,11 +73,11 @@ export const getAllTransaction =async (req:Request , res:Response) : Promise<voi
         // const skip = (page - 1) * limit;   .skip(skip).limit(limit);;
         const userId = req.user
 
-        const getTransaction =  await TransactionModel.find({userId}).sort({createdAt:1})
+        const getTransaction = await TransactionModel.find({ userId }).sort({ createdAt: 1 })
         const totalPayment = getTransaction.reduce((total, transaction) => total + transaction.payment, 0);
         res.json({
-            success : true,
-            message : "All Transaction",
+            success: true,
+            message: "All Transaction",
             getTransaction,
             totalPayment
         })
@@ -91,13 +93,13 @@ export const getAllTransaction =async (req:Request , res:Response) : Promise<voi
 
 // delete the transaction
 
-export const deleteTransaction =async (req:Request , res:Response) : Promise<void>=>{
+export const deleteTransaction = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {_id} = req.params
+        const { _id } = req.params
         await TransactionModel.findByIdAndDelete(_id);
         res.json({
-            success : true,
-            message : "Successfully deleted"
+            success: true,
+            message: "Successfully deleted"
         })
     } catch (error) {
         console.log(error);
@@ -110,69 +112,69 @@ export const deleteTransaction =async (req:Request , res:Response) : Promise<voi
 
 // get payment array month wise to show on the line chart
 
-export const getTransactionCon  = async (req:Request , res:Response) : Promise<void>=>{
+export const getTransactionCon = async (req: Request, res: Response): Promise<void> => {
     try {
         const userId = req.user
-        const data = await TransactionModel.find({userId})
+        const data = await TransactionModel.find({ userId })
     } catch (error) {
-        
+
     }
 }
 
 
 
-export const getTransaction = async (req:Request , res:Response) : Promise<void>=>{
-        try {
-            const Id = req.user
-            // console.log("userrrrrr" , Id);
-            
-            const transactions = await TransactionModel.aggregate([
-                {
-                    $match: { userId: new mongoose.Types.ObjectId(Id?.toString()) }
-                  },
-                {
-                  $project: {
-                    _id: 0, 
+export const getTransaction = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const Id = req.user
+        // console.log("userrrrrr" , Id);
+
+        const transactions = await TransactionModel.aggregate([
+            {
+                $match: { userId: new mongoose.Types.ObjectId(Id?.toString()) }
+            },
+            {
+                $project: {
+                    _id: 0,
                     payment: 1,
-                    month: { $month: { $toDate: "$date" } } 
-                  }
-                },
-                { $sort: { month: 1 } } 
-              ]);
-
-            //   console.log(transactions);
-              
-              var newTransaction=[0,0,0,0,0,0,0,0,0,0,0,0,0]
-              for (let index = 0; index < transactions.length; index++) {
-                const element = transactions[index];
-                newTransaction[element.month]+=Number(element.payment);
-              }
-
-              var newTransactionObject=[];
-              for (let index = 1; index < newTransaction.length; index++) {
-                const element = newTransaction[index];
-                var tranactionObject={
-                    payment:element,
-                    month:index
-
+                    month: { $month: { $toDate: "$date" } }
                 }
-                newTransactionObject.push(tranactionObject);
-              }
+            },
+            { $sort: { month: 1 } }
+        ]);
 
-           res.json({
-            success : true,
-            message : "All transaction get (month / payment)",
+        //   console.log(transactions);
+
+        var newTransaction = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        for (let index = 0; index < transactions.length; index++) {
+            const element = transactions[index];
+            newTransaction[element.month] += Number(element.payment);
+        }
+
+        var newTransactionObject = [];
+        for (let index = 1; index < newTransaction.length; index++) {
+            const element = newTransaction[index];
+            var tranactionObject = {
+                payment: element,
+                month: index
+
+            }
+            newTransactionObject.push(tranactionObject);
+        }
+
+        res.json({
+            success: true,
+            message: "All transaction get (month / payment)",
             newTransactionObject
-           })
-            
-        } catch (error) {
-            console.log(error);
-            
-            res.json({
-                success : false,
-                message: "something went wrong while getting transaction!!"
-            })
-        }   
+        })
+
+    } catch (error) {
+        console.log(error);
+
+        res.json({
+            success: false,
+            message: "something went wrong while getting transaction!!"
+        })
+    }
 }
 
 
@@ -180,29 +182,29 @@ export const getTransaction = async (req:Request , res:Response) : Promise<void>
 
 // CATEGORY WISE TRANSACTION TO SHOW ON PIE CHART
 
-export const getCategoryPayment = async (req:Request , res:Response) : Promise<void>=>{
+export const getCategoryPayment = async (req: Request, res: Response): Promise<void> => {
     try {
         const Id = req.user
         const transaction = await TransactionModel.aggregate([
-           { $match: { userId: new mongoose.Types.ObjectId(Id?.toString()) }},
+            { $match: { userId: new mongoose.Types.ObjectId(Id?.toString()) } },
             {
-                $group :{
-                    _id : '$category',
-                    totalAmount :{$sum : '$payment'}
+                $group: {
+                    _id: '$category',
+                    totalAmount: { $sum: '$payment' }
                 }
             }
         ])
 
         // console.log(transaction);
-        
 
 
-        const formatData = transaction.map(item=>({
-            category : item._id,
-            totalAmount : item.totalAmount
+
+        const formatData = transaction.map(item => ({
+            category: item._id,
+            totalAmount: item.totalAmount
         }))
 
-        
+
         if (transaction.length === 0) {
             // Handle case where no transactions are found
             res.json({
@@ -213,8 +215,8 @@ export const getCategoryPayment = async (req:Request , res:Response) : Promise<v
             return
         }
         res.json({
-            success : true,
-            message : "Successfully get the Piechart",
+            success: true,
+            message: "Successfully get the Piechart",
             formatData
         })
     } catch (error) {
@@ -230,42 +232,42 @@ export const getCategoryPayment = async (req:Request , res:Response) : Promise<v
 // 1. low transaction
 
 
-export const lowTransaction =  async (req:Request , res:Response) : Promise<void>=>{
+export const lowTransaction = async (req: Request, res: Response): Promise<void> => {
     try {
         const data = await TransactionModel.find({});
-        const sorted=data.sort(    (p1, p2) => (p1.payment < p2.payment) ? -1 : (p1.payment > p2.payment) ? 1 : 0);
+        const sorted = data.sort((p1, p2) => (p1.payment < p2.payment) ? -1 : (p1.payment > p2.payment) ? 1 : 0);
 
 
         res.json({
-            success : true,
-            message : "Low tranactions!!",
+            success: true,
+            message: "Low tranactions!!",
             sorted
         })
     } catch (error) {
         res.json({
-            success : false,
-            message : "low Filter is not work"
+            success: false,
+            message: "low Filter is not work"
         })
     }
 }
 
 
 
-export const highTransaction =  async (req:Request , res:Response) : Promise<void>=>{
+export const highTransaction = async (req: Request, res: Response): Promise<void> => {
     try {
         const data = await TransactionModel.find({});
-        const sorted=data.sort(    (p1, p2) => (p1.payment < p2.payment) ? 1 : (p1.payment > p2.payment) ? -1 : 0);
+        const sorted = data.sort((p1, p2) => (p1.payment < p2.payment) ? 1 : (p1.payment > p2.payment) ? -1 : 0);
 
 
         res.json({
-            success : true,
-            message : "High tranactions!!",
+            success: true,
+            message: "High tranactions!!",
             sorted
         })
     } catch (error) {
         res.json({
-            success : false,
-            message : "high Filter is not work"
+            success: false,
+            message: "high Filter is not work"
         })
     }
 }
@@ -274,20 +276,20 @@ export const highTransaction =  async (req:Request , res:Response) : Promise<voi
 // status wise transaction
 
 
-export const pendingTransaction =  async (req:Request , res:Response) : Promise<void>=>{
+export const pendingTransaction = async (req: Request, res: Response): Promise<void> => {
     try {
         const data = await TransactionModel.find({ status: "pending" });
         // console.log(data)
 
         res.json({
-            success : true,
-            message : "Pending tranactions!!",
+            success: true,
+            message: "Pending tranactions!!",
             data
         })
     } catch (error) {
         res.json({
-            success : false,
-            message : "Pending transaction is not work"
+            success: false,
+            message: "Pending transaction is not work"
         })
     }
 }
@@ -298,20 +300,20 @@ export const pendingTransaction =  async (req:Request , res:Response) : Promise<
 // completed transaction
 
 
-export const completedTransaction =  async (req:Request , res:Response) : Promise<void>=>{
+export const completedTransaction = async (req: Request, res: Response): Promise<void> => {
     try {
-        const data = await TransactionModel.find({ status: "completed"  });
+        const data = await TransactionModel.find({ status: "completed" });
         // console.log(data)
 
         res.json({
-            success : true,
-            message : "Completed tranactions!!",
+            success: true,
+            message: "Completed tranactions!!",
             data
         })
     } catch (error) {
         res.json({
-            success : false,
-            message : "Completed transaction is not work"
+            success: false,
+            message: "Completed transaction is not work"
         })
     }
 }
@@ -345,49 +347,49 @@ export const completedTransaction =  async (req:Request , res:Response) : Promis
 
 export const updateTransactionController = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { name, description, date, category, payment, status, mode } = req.body;
-  
-      const updatedTransaction = await TransactionModel.findByIdAndUpdate(
-        req.params._id,
-        { name, description, date, category, payment, status, mode },
-        { new: true }
-      );
-  
-      if (!updatedTransaction) {
-        res.status(404).json({
-          success: false,
-          message: "Transaction not found",
+        const { name, description, date, category, payment, status, mode } = req.body;
+
+        const updatedTransaction = await TransactionModel.findByIdAndUpdate(
+            req.params._id,
+            { name, description, date, category, payment, status, mode },
+            { new: true }
+        );
+
+        if (!updatedTransaction) {
+            res.status(404).json({
+                success: false,
+                message: "Transaction not found",
+            });
+            return;
+        }
+
+        res.status(201).send({
+            success: true,
+            message: "Transaction updated successfully",
+            updatedTransaction,
         });
-        return;
-      }
-  
-      res.status(201).send({
-        success: true,
-        message: "Transaction updated successfully",
-        updatedTransaction,
-      });
     } catch (error) {
-      console.error("Error in updating transaction:", error);
-      res.status(500).json({
-        success: false,
-        message: "Internal server error",
-      });
+        console.error("Error in updating transaction:", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+        });
     }
-  };
-  
+};
+
 
 
 // Dues Add
 
-export const addDuesController = async(req:Request , res : Response) : Promise<void>=>{
-    const {name , date , payment} =  req.body;
+export const addDuesController = async (req: Request, res: Response): Promise<void> => {
+    const { name, date, payment } = req.body;
 
     try {
         const userId = req.user
-        if(!(name || date || payment)){
+        if (!(name || date || payment)) {
             res.json({
-                success : true , 
-                message : 'Every Field is Required!'
+                success: true,
+                message: 'Every Field is Required!'
             })
             return
         }
@@ -395,22 +397,22 @@ export const addDuesController = async(req:Request , res : Response) : Promise<v
         const formattedDate: string = formatDate(new Date(date));
         const data = await new dueModel({
             name,
-            date : formattedDate,
+            date: formattedDate,
             payment,
-            userId : userId
+            userId: userId
         }).save()
 
         res.json({
-            success : true,
-            message : "Dues Added Successfully!!",
+            success: true,
+            message: "Dues Added Successfully!!",
             data
         })
         return
 
     } catch (error) {
         res.json({
-            success : false,
-            message : "Error in data adding!!",
+            success: false,
+            message: "Error in data adding!!",
         })
     }
 }
@@ -418,20 +420,20 @@ export const addDuesController = async(req:Request , res : Response) : Promise<v
 
 // get all dues
 
-export const getAllDuesController = async(req:Request , res : Response) : Promise<void>=>{
+export const getAllDuesController = async (req: Request, res: Response): Promise<void> => {
     try {
         const userId = req.user
-        const data = await dueModel.find({userId});
+        const data = await dueModel.find({ userId });
         res.json({
-            success : true,
-            message : "Dues get Successfully!!",
+            success: true,
+            message: "Dues get Successfully!!",
             data
         })
         return
     } catch (error) {
         res.json({
-            success : false,
-            message : "Dues get Error!!",
+            success: false,
+            message: "Dues get Error!!",
         })
     }
 }
@@ -440,7 +442,7 @@ export const getAllDuesController = async(req:Request , res : Response) : Promis
 // pay the dues
 
 
-export const payDuesController = async(req:Request , res : Response) : Promise<void>=>{
+export const payDuesController = async (req: Request, res: Response): Promise<void> => {
     const razorpay = new Razorpay({
         key_id: req.body.keyId,
         key_secret: req.body.keySecret,
@@ -461,10 +463,10 @@ export const payDuesController = async(req:Request , res : Response) : Promise<v
             amount: response.amount,
         })
     } catch (err) {
-       res.json({
-        success : false,
-        message : "Not able to create order. Please try again!"
-       })
+        res.json({
+            success: false,
+            message: "Not able to create order. Please try again!"
+        })
     }
 }
 
@@ -483,10 +485,10 @@ export const sendEmailNotification = async (req: Request, res: Response) => {
 
         const formattedDate: string = formatDate(new Date(date));
 
-      
+
 
         console.log(emails);
-        
+
         //Create a new instance of the SplitBillModel and save it to the database
         const data = await new SplitBillModel({
             name,
@@ -496,8 +498,8 @@ export const sendEmailNotification = async (req: Request, res: Response) => {
             date: formattedDate,
             category,
             status,
-            emails: emails ,
-            userId : userId
+            emails: emails,
+            userId: userId
         }).save()
 
         const transporter = nodemailer.createTransport({
@@ -506,11 +508,11 @@ export const sendEmailNotification = async (req: Request, res: Response) => {
                 user: 'pankhaniyaravi05@gmail.com',
                 pass: 'zudy grcu arht uiow'
             }
-        }); 
+        });
 
         for (const email of emails) {
-            console.log("Emals",email);
-            
+
+
             const info = await transporter.sendMail({
                 from: 'pankhaniyaravi05@gmail.com',
                 to: email,
@@ -532,26 +534,78 @@ export const sendEmailNotification = async (req: Request, res: Response) => {
         });
     }
 }
-;
+    ;
 
 
 // get all SpliBill 
 
 
-export const getAllSplitBillController = async(req:Request , res:Response)=>{
+export const getAllSplitBillController = async (req: Request, res: Response) => {
     try {
         const userId = req.user
-        const data = await SplitBillModel.find({userId});
+        const data = await SplitBillModel.find({ userId });
         res.json({
-            success : true,
-            message : "Successfully get SplitBill!!",
+            success: true,
+            message: "Successfully get SplitBill!!",
             data
         })
     } catch (error) {
         res.json({
-            success : false,
-            message : "Error in getting SplitBill!!"
+            success: false,
+            message: "Error in getting SplitBill!!"
         })
+    }
+}
+
+
+// show notification
+
+export const getSplitBillNotification = async (req: Request, res: Response) => {
+    try {
+        const userId = req.user;
+        const user = await userModel.findById(userId);
+
+        const splitBillData = await SplitBillModel.find({ userId });
+
+        const data : any = [];
+
+        if (splitBillData && splitBillData.length > 0) {
+            splitBillData.forEach((bill) => {
+                const emails = bill.emails;
+                for (let i = 0; i < emails.length; i++) {
+                    if (user?.email === emails[i]) {
+                        data.push({
+                            name: bill.name,
+                            description: bill.description,
+                            date: bill.date,
+                            payment: bill.payment
+                        });
+                    }
+                }
+            });
+
+            if (data.length === 0) {
+                res.json({
+                    success: false,
+                    message: "There is No Notification for you!!",
+                })
+                return
+            }
+        } else {
+            console.log("SplitBill data not found");
+        }
+
+        res.json({
+            success: true,
+            message: "Successfully get SplitBill!!",
+            data: data
+        });
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error in getting SplitBill data"
+        });
     }
 }
 
@@ -562,7 +616,7 @@ export const getAllSplitBillController = async(req:Request , res:Response)=>{
 export const getDailyTransactionData = async (req: Request, res: Response) => {
     try {
         const userId = req.user
-        const transactions = await TransactionModel.find({userId});
+        const transactions = await TransactionModel.find({ userId });
 
         const dailyPaymentData: { date: string; payment: number }[] = [];
 
@@ -570,22 +624,22 @@ export const getDailyTransactionData = async (req: Request, res: Response) => {
             const date = transaction.date.toString();
             const payment = transaction.payment;
 
-          
+
             const existingRecord = dailyPaymentData.find(record => record.date === date);
 
             if (existingRecord) {
-                
+
                 existingRecord.payment += payment;
             } else {
-               
+
                 dailyPaymentData.push({ date, payment });
             }
         });
 
-       
+
         res.json({
             success: true,
-            message : "Get All Daily transaction data successfully!!",
+            message: "Get All Daily transaction data successfully!!",
             dailyPaymentData
         });
     } catch (error) {
@@ -598,7 +652,7 @@ export const getDailyTransactionData = async (req: Request, res: Response) => {
 
 
 
-export const getMonthWisePaymentController = async (req:Request , res:Response) =>{
+export const getMonthWisePaymentController = async (req: Request, res: Response) => {
     try {
         const userId = req.user
 
@@ -629,17 +683,17 @@ export const getMonthWisePaymentController = async (req:Request , res:Response) 
 
         const day = 0o2; // Example: Day you want to retrieve data for
 
-const data = await TransactionModel.find({
-  date: { $regex: new RegExp(`^${day}-`, 'i') }
-});
-          
-          res.json({
+        const data = await TransactionModel.find({
+            date: { $regex: new RegExp(`^${day}-`, 'i') }
+        });
+
+        res.json({
             data
-          })
-          
+        })
+
     } catch (error) {
         res.json({
             error
-          })
+        })
     }
 }
