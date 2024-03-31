@@ -1,13 +1,13 @@
 import { Request, Response } from 'express'
-import LimitModel from '../models/LimitModel';
-
+import {LimitModel} from '../models/LimitModel';
+// import {LimitModel} from '../models/LimitModel';
 export const addLimitController = async (req: Request, res: Response): Promise<void> => {
     try {
         const userId = req.user
-        const {income,daily_limit} = req.body;
+        const {income,daily_limit, month} = req.body;
 
         const data = new LimitModel({
-            income , daily_limit , userId
+            income , daily_limit ,month, userId
         })
 
         await data.save()
@@ -54,8 +54,8 @@ export const getLimitController = async (req: Request, res: Response): Promise<v
 export const updateLimitController = async (req: Request, res: Response): Promise<void> => {
     try {
         const userId = req.user
-        const {income,daily_limit} = req.body;
-        const data=await LimitModel.findOneAndUpdate({userId}, {$set:{income:income, daily_limit: daily_limit}}, {new: true})
+        const {income,daily_limit,month} = req.body;
+        const data=await LimitModel.findOneAndUpdate({userId}, {$set:{income:income, daily_limit: daily_limit, month:month}}, {new: true})
 
         res.json({
             success : true,

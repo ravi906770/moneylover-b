@@ -560,35 +560,83 @@ export const getAllSplitBillController = async (req: Request, res: Response) => 
 
 // show notification
 
-export const getSplitBillNotification = async (req: Request, res: Response) => {
+// export const getSplitBillNotification = async (req: Request, res: Response) => {
+//     try {
+//         const userId = req.user;
+//         const user = await userModel.findById(userId);
+
+//         const splitBillData = await SplitBillModel.find({ userId });
+
+//         const data : any = [];
+
+//         if (splitBillData && splitBillData.length > 0) {
+//             splitBillData.forEach((bill) => {
+//                 const emails = bill.emails;
+//                 for (let i = 0; i < emails.length; i++) {
+//                     if (user?.email === emails[i]) {
+//                         data.push({
+//                             name: bill.name,
+//                             description: bill.description,
+//                             date: bill.date,
+//                             payment: bill.payment
+//                         });
+//                     }
+//                 }
+//             });
+
+//             if (data.length === 0) {
+//                 res.json({
+//                     success: false,
+//                     message: "There is No Notification for you!!",
+//                 })
+//                 return
+//             }
+//         } else {
+//             console.log("SplitBill data not found");
+//         }
+
+//         res.json({
+//             success: true,
+//             message: "Successfully get SplitBill!!",
+//             data: data
+//         });
+//     } catch (error) {
+//         console.error("Error:", error);
+//         res.status(500).json({
+//             success: false,
+//             message: "Error in getting SplitBill data"
+//         });
+//     }
+// }
+
+export const getSplitBillNotification = async (req: Request, res: Response): Promise<void> => {
     try {
         const userId = req.user;
         const user = await userModel.findById(userId);
 
-        const splitBillData = await SplitBillModel.find({ userId });
+        const splitBillData = await SplitBillModel.find({});
 
-        const data : any = [];
+        const data: any[] = [];
 
         if (splitBillData && splitBillData.length > 0) {
             splitBillData.forEach((bill) => {
-                const emails = bill.emails;
-                for (let i = 0; i < emails.length; i++) {
-                    if (user?.email === emails[i]) {
-                        data.push({
-                            name: bill.name,
-                            description: bill.description,
-                            date: bill.date,
-                            payment: bill.payment
-                        });
-                    }
+                const emails: string[] = bill.emails;
+                // Check if the user's email is included in the emails array of the bill
+                if (emails.includes(user?.email ?? "")) {
+                    data.push({
+                        name: bill.name,
+                        description: bill.description,
+                        date: bill.date,
+                        payment: bill.payment
+                    });
                 }
             });
 
             if (data.length === 0) {
-                res.json({
+                 res.json({
                     success: false,
-                    message: "There is No Notification for you!!",
-                })
+                    message: "There are no notifications for you!!",
+                });
                 return
             }
         } else {
@@ -597,7 +645,7 @@ export const getSplitBillNotification = async (req: Request, res: Response) => {
 
         res.json({
             success: true,
-            message: "Successfully get SplitBill!!",
+            message: "Successfully got SplitBill notifications!!",
             data: data
         });
     } catch (error) {
@@ -608,6 +656,7 @@ export const getSplitBillNotification = async (req: Request, res: Response) => {
         });
     }
 }
+
 
 
 

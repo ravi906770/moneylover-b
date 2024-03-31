@@ -12,6 +12,7 @@
   import bodyParser from 'body-parser';
   import session from "express-session";
   import  "./passport"
+  import "./Scheduler"
 
 
 
