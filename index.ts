@@ -15,8 +15,6 @@
   import "./Scheduler"
 
 
-
-
   connection();
 
   const app = express();
